@@ -35,6 +35,32 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should respect aggregation condition and recheck it until it's true", function(done) {
+		var conditionEvaluatedCount = 0;
+		var w = new Watchpack({
+			aggregateTimeout: function() {
+				conditionEvaluatedCount++;
+				return conditionEvaluatedCount === 3;
+			}
+		});
+		var changeEvents = 0;
+		w.on("change", function(file) {
+			file.should.be.eql(path.join(fixtures, "a"));
+			changeEvents++;
+		});
+		w.on("aggregated", function(changes, removes) {
+			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+			changeEvents.should.be.greaterThan(0);
+			conditionEvaluatedCount.should.be.eql(3);
+			w.close();
+			done();
+		});
+		w.watch([path.join(fixtures, "a")], [], Date.now() + 100);
+		testHelper.tick(1000, function() {
+			testHelper.file("a");
+		});
+	});
+
 	it("should aggregate changes while paused", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000

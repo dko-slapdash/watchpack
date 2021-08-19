@@ -31,6 +31,11 @@ var wp = new Watchpack({
 	aggregateTimeout: 1000,
 	// fire "aggregated" event when after a change for 1000ms no additional change occurred
 	// aggregated defaults to undefined, which doesn't fire an "aggregated" event
+	// if a function (sync or async) is passed instead of a number, it's treated as a condition,
+	// so the aggregation happens only when it returns true; if the function returns false, then
+	// the timer is rescheduled to the default 200 ms and then the condition function is called
+	// again until the function returns true; the condition function can also return a number,
+	// in which case it's treated as "please re-evaluate me in N milliseconds"
 
 	poll: true,
 	// poll: true - use polling with the default interval
